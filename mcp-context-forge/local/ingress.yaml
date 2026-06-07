@@ -1,4 +1,4 @@
-# ingress.yaml — 网关 Ingress（通过 Traefik 暴露）
+# ingress.yaml — 网关 Ingress（通过 Traefik 暴露，支持 HTTPS）
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -6,9 +6,12 @@ metadata:
   name: mcp-context-forge-ingress
   namespace: mcp-gateway
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
 spec:
   ingressClassName: traefik
+  tls:
+  - hosts:
+    - gateway.ono
   rules:
   - host: gateway.ono
     http:
