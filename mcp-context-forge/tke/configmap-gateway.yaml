@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mcp-context-forge-gateway-config
+  namespace: mcp-gateway
+data:
+  HTTP_SERVER: "gunicorn"
+  GUNICORN_WORKERS: "4"
+  GUNICORN_TIMEOUT: "600"
+  GUNICORN_MAX_REQUESTS: "100000"
+  GUNICORN_MAX_REQUESTS_JITTER: "100"
+  GUNICORN_PRELOAD_APP: "true"
+  GUNICORN_DEV_MODE: "false"
+  DISABLE_ACCESS_LOG: "true"
+
+  HOST: "0.0.0.0"
+  PORT: "4444"
+  RELOAD: "false"
+
+  MCPGATEWAY_UI_ENABLED: "true"
+  MCPGATEWAY_ADMIN_API_ENABLED: "true"
+  MCPGATEWAY_A2A_ENABLED: "true"
+  PLUGINS_ENABLED: "true"
+
+  LOG_LEVEL: "INFO"
+  LOG_TO_FILE: "false"
+  STRUCTURED_LOGGING_ENABLED: "true"
+  STRUCTURED_LOGGING_DATABASE_ENABLED: "true"
+
+  CACHE_TYPE: "redis"
+  CACHE_PREFIX: "mcpgw:"
+
+  SSRF_PROTECTION_ENABLED: "true"
+  SSRF_ALLOW_PRIVATE_NETWORKS: "true"
+
+  OBSERVABILITY_ENABLED: "false"

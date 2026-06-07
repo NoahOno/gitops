@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcp-context-forge-mcpgateway-lb
+  namespace: mcp-gateway
+  labels:
+    app: mcp-context-forge-mcpgateway
+spec:
+  type: LoadBalancer
+  selector:
+    app: mcp-context-forge-mcpgateway
+  ports:
+    - name: http
+      port: 80
+      targetPort: 4444
+      protocol: TCP

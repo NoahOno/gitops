@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-context-forge-mcpgateway
+  namespace: mcp-gateway
+  labels:
+    app: mcp-context-forge-mcpgateway
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mcp-context-forge-mcpgateway
+  template:
+    metadata:
+      labels:
+        app: mcp-context-forge-mcpgateway
+    spec:
+      securityContext:
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: mcpgateway
+          image: ghcr.io/ibm/mcp-context-forge:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4444
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: false
+
+          env:
+            - name: POSTGRES_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-external-credentials
+                  key: host
+            - name: POSTGRES_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-external-credentials
+                  key: port
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-external-credentials
+                  key: dbname
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-external-credentials
+                  key: user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-external-credentials
+                  key: password
+
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: redis-external-credentials
+                  key: REDIS_URL
+
+            - name: DATABASE_URL
+              value: "postgresql+psycopg://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)"
+
+            - name: MCPGATEWAY_SKIP_MIGRATIONS
+              value: "false"
+
+          envFrom:
+            - secretRef:
+                name: mcp-context-forge-gateway-secret
+            - configMapRef:
+                name: mcp-context-forge-gateway-config
+
+          startupProbe:
+            exec:
+              command: ["sh", "-c", "sleep 10"]
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 15
+            failureThreshold: 1
+
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 4444
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 3
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4444
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 3
+
+          resources:
+            limits:
+              cpu: "2"
+              memory: 2Gi
+            requests:
+              cpu: 500m
+              memory: 768Mi
