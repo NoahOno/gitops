@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: mcp-context-forge-mcpgateway-lb
+  name: mcp-context-forge-mcpgateway
   namespace: mcp-gateway
   labels:
     app: mcp-context-forge-mcpgateway
